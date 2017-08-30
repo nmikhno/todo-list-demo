@@ -77,7 +77,7 @@
         var listItem = qs ('[data-id="' + id + '"]');
 
         qsa ('input[type="checkbox"]', listItem).forEach (function (checkbox) {
-            checkbox.checked = isCompleted ? 'checked' : '';
+            isCompleted ? checkbox.setAttribute ('checked', 'checked') : checkbox.removeAttribute ('checked');
         });
     };
 

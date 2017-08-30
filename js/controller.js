@@ -126,6 +126,7 @@
         var that = this;
 
         that.model.update (id, {isCompleted: isCompleted}, function () {
+            console.log (arguments);
             that.view.render ('markItemCompleted', {id: id, isCompleted: isCompleted})
         });
     };

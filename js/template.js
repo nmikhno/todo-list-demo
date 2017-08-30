@@ -47,7 +47,7 @@
             template = template.replace ('{{id}}', data[i].id);
             template = template.replace ('{{title}}', data[i].title);
             template = template.replace ('{{checked}}', data[i].isCompleted ? 'checked' : '');
-
+            console.log (data[i].isCompleted);
             view = view + template;
         }
 
