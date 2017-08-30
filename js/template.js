@@ -11,7 +11,7 @@
         this.defaultTemplate = [
             '<li data-id="{{id}}">',
                 '<div class="view">',
-                    '<input type="checkbox">',
+                    '<input type="checkbox" {{checked}}>',
                     '<label>',
                         '{{title}}',
                     '</label>',
@@ -46,6 +46,7 @@
 
             template = template.replace ('{{id}}', data[i].id);
             template = template.replace ('{{title}}', data[i].title);
+            template = template.replace ('{{checked}}', data[i].isCompleted ? 'checked' : '');
 
             view = view + template;
         }

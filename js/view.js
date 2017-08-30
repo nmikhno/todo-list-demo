@@ -18,28 +18,28 @@
         this.ENTER_KEY = 13;
         this.ESCAPE_KEY = 27;
 
-        this.$todoList = qs('#todo-list');
-        this.$todoItemCounter = qs('#todo-count');
-        this.$main = qs('#main');
-        this.$footer = qs('#footer');
-        this.$newTodo = qs('#new-todo');
+        this.$todoList = qs ('#todo-list');
+        this.$todoItemCounter = qs ('#todo-count');
+        this.$main = qs ('#main');
+        this.$footer = qs ('#footer');
+        this.$newTodo = qs ('#new-todo');
     }
 
     View.prototype._removeItem = function (id) {
-        var elem = qs('[data-id="' + id + '"]');
+        var elem = qs ('[data-id="' + id + '"]');
 
         if (elem) {
-            this.$todoList.removeChild(elem);
+            this.$todoList.removeChild (elem);
         }
     };
 
     View.prototype._setFilter = function (currentPage) {
-        qs('#filters .selected').className = '';
-        qs('#filters [href="#/' + currentPage + '"]').className = 'selected';
+        qs ('#filters .selected').className = '';
+        qs ('#filters [href="#/' + currentPage + '"]').className = 'selected';
     };
 
     View.prototype._editItem = function (id, title) {
-        var listItem = qs('[data-id="' + id + '"]');
+        var listItem = qs ('[data-id="' + id + '"]');
 
         if (!listItem) {
             return;
@@ -47,97 +47,129 @@
 
         listItem.className = listItem.className + ' editing';
 
-        var input = document.createElement('input');
+        var input = document.createElement ('input');
         input.className = 'edit';
 
-        listItem.appendChild(input);
-        input.focus();
+        listItem.appendChild (input);
+        input.focus ();
         input.value = title;
     };
 
     View.prototype._editItemDone = function (id, title) {
-        var listItem = qs('[data-id="' + id + '"]');
+        var listItem = qs ('[data-id="' + id + '"]');
 
         if (!listItem) {
             return;
         }
 
-        var input = qs('input.edit', listItem);
-        listItem.removeChild(input);
+        var input = qs ('input.edit', listItem);
+        listItem.removeChild (input);
 
-        listItem.className = listItem.className.replace('editing', '');
+        listItem.className = listItem.className.replace ('editing', '');
 
-        qsa('label', listItem).forEach(function (label) {
+        qsa ('label', listItem).forEach (function (label) {
             label.textContent = title;
         });
 
+    };
+
+    View.prototype._markAsCompleted = function (id, isCompleted) {
+        var listItem = qs ('[data-id="' + id + '"]');
+
+        qsa ('input[type="checkbox"]', listItem).forEach (function (checkbox) {
+            checkbox.checked = isCompleted ? 'checked' : '';
+        });
     };
 
     View.prototype.render = function (viewCmd, parameter) {
         var that = this;
         var viewCommands = {
             showEntries: function () {
-                that.$todoList.innerHTML = that.template.show(parameter);
-            },
-            removeItem: function () {
-                that._removeItem(parameter);
-            },
-            updateElementCount: function () {
-                that.$todoItemCounter.innerHTML = that.template.itemCounter(parameter);
-            },
-            contentBlockVisibility: function () {
+                that.$todoList.innerHTML = that.template.show (parameter);
+            }, removeItem: function () {
+                that._removeItem (parameter);
+            }, updateElementCount: function () {
+                that.$todoItemCounter.innerHTML = that.template.itemCounter (parameter);
+            }, contentBlockVisibility: function () {
                 that.$main.style.display = that.$footer.style.display = parameter.visible ? 'block' : 'none';
-            },
-            setFilter: function () {
-                that._setFilter(parameter);
-            },
-            clearNewTodo: function () {
+            }, setFilter: function () {
+                that._setFilter (parameter);
+            }, clearNewTodo: function () {
                 that.$newTodo.value = '';
-            },
-            editItem: function () {
-                that._editItem(parameter.id, parameter.title);
-            },
-            editItemDone: function () {
-                that._editItemDone(parameter.id, parameter.title);
+            }, editItem: function () {
+                that._editItem (parameter.id, parameter.title);
+            }, markItemCompleted: function () {
+                that._markAsCompleted (parameter.id, parameter.isCompleted);
+            }, editItemDone: function () {
+                that._editItemDone (parameter.id, parameter.title);
             }
         };
 
-        viewCommands[viewCmd]();
+        viewCommands[viewCmd] ();
     };
 
     View.prototype._itemId = function (element) {
-        var li = $parent(element, 'li');
-        return parseInt(li.dataset.id, 10);
+        var li = $parent (element, 'li');
+        return parseInt (li.dataset.id, 10);
     };
 
     View.prototype._bindItemEditDone = function (handler) {
         var that = this;
-        $live('#todo-list li .edit', 'blur', function () {
+        $live ('#todo-list li .edit', 'blur', function () {
             if (!this.dataset.iscanceled) {
-                handler({
-                    id: that._itemId(this),
-                    title: this.value
+                handler ({
+                    id: that._itemId (this), title: this.value
                 });
             }
         });
 
-        $live('#todo-list li .edit', 'keypress', function (event) {
+        $live ('#todo-list li .edit', 'keypress', function (event) {
             if (event.keyCode === that.ENTER_KEY) {
                 // Remove the cursor from the input when you hit enter just like if it
                 // were a real form
-                this.blur();
+                this.blur ();
+            }
+        });
+    };
+
+    View.prototype._bindItemIsCompleted = function (handler) {
+        var that = this;
+
+        $live ('#todo-list li input', 'click', function () {
+            handler ({
+                id: that._itemId (this), isCompleted: this.checked
+            });
+        });
+
+    };
+
+    View.prototype._bindItemEditDone = function (handler) {
+        var that = this;
+        $live ('#todo-list li .edit', 'blur', function () {
+            if (!this.dataset.iscanceled) {
+                handler ({
+                    id: that._itemId (this), title: this.value
+                });
+            }
+        });
+
+        $live ('#todo-list li .edit', 'keypress', function (event) {
+            if (event.keyCode === that.ENTER_KEY) {
+                // Remove the cursor from the input when you hit enter just like if it
+                // were a real form
+                this.blur ();
             }
         });
     };
 
     View.prototype._bindItemEditCancel = function (handler) {
         var that = this;
-        $live('#todo-list li .edit', 'keyup', function (event) {
+        $live ('#todo-list li .edit', 'keyup', function (event) {
             if (event.keyCode === that.ESCAPE_KEY) {
                 this.dataset.iscanceled = true;
-                this.blur();
+                this.blur ();
 
-                handler({id: that._itemId(this)});
+                handler ({id: that._itemId (this)});
             }
         });
     };
@@ -145,29 +177,30 @@
     View.prototype.bind = function (event, handler) {
         var that = this;
         if (event === 'newTodo') {
-            $on(that.$newTodo, 'change', function () {
-                handler(that.$newTodo.value);
+            $on (that.$newTodo, 'change', function () {
+                handler (that.$newTodo.value);
             });
 
         } else if (event === 'itemEdit') {
-            $live('#todo-list li label', 'dblclick', function () {
-                handler({id: that._itemId(this)});
+            $live ('#todo-list li label', 'dblclick', function () {
+                handler ({id: that._itemId (this)});
             });
 
         } else if (event === 'itemRemove') {
-            $live('#todo-list .destroy', 'click', function () {
-                handler({id: that._itemId(this)});
+            $live ('#todo-list .destroy', 'click', function () {
+                handler ({id: that._itemId (this)});
             });
 
         } else if (event === 'itemEditDone') {
-            that._bindItemEditDone(handler);
-
+            that._bindItemEditDone (handler);
+        } else if (event === 'markItemCompleted') {
+            that._bindItemIsCompleted (handler)
         } else if (event === 'itemEditCancel') {
-            that._bindItemEditCancel(handler);
+            that._bindItemEditCancel (handler);
         }
     };
 
     // Export to window
     window.app = window.app || {};
     window.app.View = View;
-}(window));
+} (window));
